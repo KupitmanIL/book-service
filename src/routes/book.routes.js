@@ -1,27 +1,19 @@
-import {Router} from 'express';
-import {addBook,
+import {Router} from "express";
+import {
+    addBook,
     findBookByIsbn,
+    findBooksByAuthor, findBooksByPublisher,
     removeBook,
-    updateBookTitle,
-    findBooksByAuthor,
-    findBooksByPublisher,
-    findBookAuthorsByIsbn,
-    findPublishersByAuthor,
-    removeAuthor} from '../controllers/book.controller.js';
-
-import validate from "../middlewares/validator.middleware.js";
-
+    updateBookTitle
+} from "../controllers/book.controller.js";
 
 const router = Router();
 
-router.post('/book', validate('addBook'), addBook );
-router.get('/book/:isbn', validate('findBookByIsbn'), findBookByIsbn );
-router.delete('/book/:isbn', validate('removeBook'), removeBook );
-router.patch('/book/:isbn/title/:title', validate('updateBookTitle'), updateBookTitle );
-router.get('/books/author/:author', validate('findBooksByAuthor'), findBooksByAuthor );
-router.get('/books/publisher/:publisher', validate('findBooksByPublisher'), findBooksByPublisher );
-router.get('/authors/book/:isbn', validate('findBookAuthorsByIsbn'), findBookAuthorsByIsbn);
-router.get('/publishers/author/:author', validate('findPublishersByAuthor'), findPublishersByAuthor);
-router.delete('/author/:author', validate('removeAuthor'), removeAuthor);
+router.post('/book', addBook);
+router.get('/book/:isbn', findBookByIsbn);
+router.delete('/book/:isbn', removeBook);
+router.patch('/book/:isbn/title/:title', updateBookTitle);
+router.get('/books/author/:authorName', findBooksByAuthor);
+router.get('/books/publisher/:publisherName', findBooksByPublisher);
 
 export default router;

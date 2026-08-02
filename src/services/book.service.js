@@ -108,26 +108,76 @@ export const updateBookTitle = async (isbn, title) => {
 
 export const findBooksByAuthor = async (authorName) => {
     const author = await authorRepository.findAuthorById(authorName);
+
     if (!author) {
         throw new Error(`Author ${authorName} not found`);
     }
+
     return author.getBooks({
         attributes: {
             exclude: ['createdAt', 'updatedAt']
         },
-        joinTableAttributes: []
+        joinTableAttributes: [],
+        include: [
+            {
+                model: Author,
+                as: 'authors',
+                through: {
+                    attributes: []
+                },
+                attributes: {
+                    exclude: [
+                        'createdAt',
+                        'updatedAt',
+                        'birth_date'
+                    ],
+                    include: [
+                        'name',
+                        [
+                            sequelize.col('birth_date'),
+                            'birthDate'
+                        ]
+                    ]
+                }
+            }
+        ]
     });
-}
+};
 
 export const findBooksByPublisher = async (publisherName) => {
     const publisher =
         await publisherRepository.findPublisherById(publisherName);
+
     if (!publisher) {
         throw new Error(`Publisher ${publisherName} not found`);
     }
+
     return publisher.getBooks({
         attributes: {
             exclude: ['createdAt', 'updatedAt']
-        }
+        },
+        include: [
+            {
+                model: Author,
+                as: 'authors',
+                through: {
+                    attributes: []
+                },
+                attributes: {
+                    exclude: [
+                        'createdAt',
+                        'updatedAt',
+                        'birth_date'
+                    ],
+                    include: [
+                        'name',
+                        [
+                            sequelize.col('birth_date'),
+                            'birthDate'
+                        ]
+                    ]
+                }
+            }
+        ]
     });
-}
+};

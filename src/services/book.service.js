@@ -2,7 +2,7 @@ import * as bookRepository from '../repositories/book.repository.js';
 import * as publisherRepository from '../repositories/publisher.repository.js';
 import * as authorRepository from '../repositories/author.repository.js';
 import {Author} from "../models/index.js";
-import {sequelize} from "../configuration/database.js";
+import {sequelize} from "../config/database.js";
 
 export const addBook = async (book) => {
     const t = await sequelize.transaction();
@@ -97,23 +97,46 @@ export const removeBook = async (isbn) => {
 }
 
 export const updateBookTitle = async (isbn, title) => {
-    const book = await bookRepository.findBookById(isbn);
-    if (!book) {
-        throw new Error(`Book with ISBN ${isbn} not found`);
+    const transaction = await sequelize.transaction();
+    try {
+        const book = await bookRepository.findBookById(isbn, {
+            transaction,
+            attributes: {
+                exclude: ['createdAt', 'updatedAt']
+            },
+            include: [
+                {
+                    model: Author,
+                    as: 'authors',
+                    through: {
+                        attributes: []
+                    },
+                    attributes: {
+                        exclude: ['createdAt', 'updatedAt', 'birth_date'],
+                        include: ['name', [sequelize.col('birth_date'), 'birthDate']]
+                    }
+                }
+            ]
+        });
+        if (!book) {
+            throw new Error(`Book with ISBN ${isbn} not found`);
+        }
+        await book.update({title}, {transaction});
+        await transaction.commit();
+        return book;
+    } catch (e) {
+        await transaction.rollback();
+        console.log('Error updating book:', e);
+        throw e;
     }
-    await book.update({title});
-    return findBookByIsbn(isbn);
 }
-
 
 export const findBooksByAuthor = async (authorName) => {
     const author = await authorRepository.findAuthorById(authorName);
-
     if (!author) {
-        throw new Error(`Author ${authorName} not found`);
+        throw new Error(`Author with name ${authorName} not found`);
     }
-
-    return author.getBooks({
+    return await author.getBooks({
         attributes: {
             exclude: ['createdAt', 'updatedAt']
         },
@@ -126,33 +149,22 @@ export const findBooksByAuthor = async (authorName) => {
                     attributes: []
                 },
                 attributes: {
-                    exclude: [
-                        'createdAt',
-                        'updatedAt',
-                        'birth_date'
-                    ],
-                    include: [
-                        'name',
-                        [
-                            sequelize.col('birth_date'),
-                            'birthDate'
-                        ]
-                    ]
+                    exclude: ['createdAt', 'updatedAt', 'birth_date'],
+                    include: ['name', [sequelize.col('birth_date'), 'birthDate']]
                 }
             }
         ]
     });
-};
+}
 
 export const findBooksByPublisher = async (publisherName) => {
-    const publisher =
-        await publisherRepository.findPublisherById(publisherName);
-
-    if (!publisher) {
-        throw new Error(`Publisher ${publisherName} not found`);
+    if (!await publisherRepository.findPublisherById(publisherName)) {
+        throw new Error(`Publisher with name ${publisherName} not found`);
     }
-
-    return publisher.getBooks({
+    return await bookRepository.findBooks({
+        where: {
+            publisher: publisherName
+        },
         attributes: {
             exclude: ['createdAt', 'updatedAt']
         },
@@ -164,20 +176,10 @@ export const findBooksByPublisher = async (publisherName) => {
                     attributes: []
                 },
                 attributes: {
-                    exclude: [
-                        'createdAt',
-                        'updatedAt',
-                        'birth_date'
-                    ],
-                    include: [
-                        'name',
-                        [
-                            sequelize.col('birth_date'),
-                            'birthDate'
-                        ]
-                    ]
+                    exclude: ['createdAt', 'updatedAt', 'birth_date'],
+                    include: ['name', [sequelize.col('birth_date'), 'birthDate']]
                 }
             }
         ]
     });
-};
+}

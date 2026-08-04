@@ -17,20 +17,32 @@ export const findBookAuthors = async (isbn) => {
 }
 
 export const removeAuthor = async (authorName) => {
-    // FIXME implements remove author logic with cascade remove all his books
     const transaction = await sequelize.transaction();
     try {
         const author = await authorRepository.findAuthorById(authorName, {
             transaction,
             attributes: {
                 exclude: ['createdAt', 'updatedAt', 'birth_date'],
-                include: ['name', [sequelize.col('birth_date'), 'birthDate']]
+                include: [
+                    'name',
+                    [sequelize.col('birth_date'), 'birthDate']
+                ]
             }
         });
         if (!author) {
             throw new Error(`Author with name ${authorName} not found`);
         }
-        await author.destroy({transaction});
+        const books = await author.getBooks({
+            transaction
+        });
+        for (const book of books) {
+            await book.destroy({
+                transaction
+            });
+        }
+        await author.destroy({
+            transaction
+        });
         await transaction.commit();
         return author;
     } catch (e) {
@@ -38,4 +50,4 @@ export const removeAuthor = async (authorName) => {
         console.log('Error removing author:', e);
         throw e;
     }
-}
+};

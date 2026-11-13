@@ -2,7 +2,7 @@ import * as bookRepository from '../repositories/book.repository.js';
 import * as publisherRepository from '../repositories/publisher.repository.js';
 import * as authorRepository from '../repositories/author.repository.js';
 import {Author} from "../models/index.js";
-import {sequelize} from "../config/database.js";
+import {sequelize} from "../configuration/database.js";
 
 export const addBook = async (book) => {
     const t = await sequelize.transaction();

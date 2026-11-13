@@ -1,5 +1,5 @@
 import * as authorRepository from '../repositories/author.repository.js';
-import {sequelize} from "../config/database.js";
+import {sequelize} from "../configuration/database.js";
 import {QueryTypes} from 'sequelize';
 
 export const findPublishersByAuthor = async (authorName) => {

@@ -1,2 +1,17 @@
-/node_modules/
-/.env
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# HTTP Client responses
+.httpRequests/

@@ -1,0 +1,21 @@
+### Create a book
+POST http://localhost:8080/book
+Content-Type: application/json
+
+{
+  "isbn": "9780132350884",
+  "title": "Clean Code",
+  "publisher": "Prentice Hall",
+  "authors": [
+    {
+      "name": "Robert C. Martin",
+      "birth_date": "1952-12-05"
+    }
+  ]
+}
+
+### Get book by ISBN
+GET http://localhost:8080/book/9780132350884
+
+### Delete book
+DELETE http://localhost:8080/book/9780132350884

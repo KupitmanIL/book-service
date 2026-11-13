@@ -1,5 +1,7 @@
 import {Publisher} from '../models/index.js';
 
-export const findPublisherById = async (id,options = {}) => Publisher.findByPk(id);
+export const findPublisherById = async (id, options = {}) =>
+    Publisher.findByPk(id, options);
 
-export const addPublisher = async (publisherName,options = {}) => Publisher.create({publisher_name: publisherName});
+export const addPublisher = async (publisherName, options = {}) =>
+    Publisher.create({publisher_name: publisherName}, options);
